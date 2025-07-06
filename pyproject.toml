@@ -3,7 +3,7 @@ name = "grepip"
 version = "0.1.0"
 description = "Search occurrences of regex patterns in PyPI pacakges."
 authors = [{ name = "Xuanteng Huang", email = "xuanteng.huang@outlook.com" }]
-dependencies = ["aiohttp>=3.12.13", "aiofiles>=24.1.0"]
+dependencies = ["aiohttp>=3.12.13", "aiofiles>=24.1.0", "aiolimiter>=1.2.1"]
 requires-python = "==3.13.*"
 readme = "README.md"
 license = { text = "MIT" }

@@ -5,7 +5,7 @@
 groups = ["default", "dev"]
 strategy = ["inherit_metadata"]
 lock_version = "4.5.0"
-content_hash = "sha256:9042b76bf59ba80bf414b3e4961bbfbc932bb84fa531806f762bcae2d37f2423"
+content_hash = "sha256:119273aee88ff3f621ecb0223cd53c08f456cc232fe3cfb71e959e6cf799e550"
 
 [[metadata.targets]]
 requires_python = "==3.13.*"
@@ -67,6 +67,17 @@ files = [
     {file = "aiohttp-3.12.13-cp313-cp313-win32.whl", hash = "sha256:7d7e68787a2046b0e44ba5587aa723ce05d711e3a3665b6b7545328ac8e3c0dd"},
     {file = "aiohttp-3.12.13-cp313-cp313-win_amd64.whl", hash = "sha256:5a178390ca90419bfd41419a809688c368e63c86bd725e1186dd97f6b89c2706"},
     {file = "aiohttp-3.12.13.tar.gz", hash = "sha256:47e2da578528264a12e4e3dd8dd72a7289e5f812758fe086473fab037a10fcce"},
+]
+
+[[package]]
+name = "aiolimiter"
+version = "1.2.1"
+requires_python = "<4.0,>=3.8"
+summary = "asyncio rate limiter, a leaky bucket implementation"
+groups = ["default"]
+files = [
+    {file = "aiolimiter-1.2.1-py3-none-any.whl", hash = "sha256:d3f249e9059a20badcb56b61601a83556133655c11d1eb3dd3e04ff069e5f3c7"},
+    {file = "aiolimiter-1.2.1.tar.gz", hash = "sha256:e02a37ea1a855d9e832252a105420ad4d15011505512a1a1d814647451b5cca9"},
 ]
 
 [[package]]

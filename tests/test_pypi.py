@@ -36,7 +36,8 @@ class TestPypiPackageInfo(unittest.IsolatedAsyncioTestCase):
         popular_packages: list[str] = await gp.fetch_popular_pypi_packages()
         self.assertTrue(len(popular_packages) > 0, "No popular PyPI packages found")
 
-        num_url_accessible = 100
+        num_url_accessible = 300
+        self.assertLessEqual(num_url_accessible, len(popular_packages))
         semaphore = asyncio.Semaphore(10)
         tasks: list[asyncio.Task] = []
         async with semaphore, asyncio.TaskGroup() as tg:

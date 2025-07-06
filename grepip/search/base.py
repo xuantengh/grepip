@@ -1,9 +1,17 @@
 import abc
+import dataclasses
+
+
+@dataclasses.dataclass(frozen=True)
+class CodeResult:
+    file: str
+    path: str
+    http_url: str
 
 
 class CodeSearcher(abc.ABC):
-    @abc.abstractmethod
     @classmethod
+    @abc.abstractmethod
     def is_acceptable(cls, codebase_url: str) -> bool:
         """
         Check if the codebase URL is acceptable for this searcher.
@@ -22,7 +30,7 @@ class CodeSearcher(abc.ABC):
         codebase: str,
         pattern: str,
         languages: list[str] | None = None,
-    ) -> list[dict]:
+    ) -> list[CodeResult]:
         """
         Search for code snippets based on the provided pattern.
 

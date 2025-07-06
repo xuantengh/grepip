@@ -13,9 +13,8 @@ class TestGitHubSearch(unittest.IsolatedAsyncioTestCase):
         )
         self.assertTrue(len(results) > 0, "cudaMemcpy must in cupy/cupy")
 
-        semaphore = asyncio.Semaphore(5)  # rate limit
         tasks: list[asyncio.Task] = []
-        async with semaphore, asyncio.TaskGroup() as tg:
+        async with asyncio.TaskGroup() as tg:
             for result in results:
                 task = tg.create_task(is_url_accessible(result.http_url))
                 tasks.append(task)
