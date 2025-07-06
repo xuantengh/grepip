@@ -1,18 +1,8 @@
 import grepip.search as gs
+from grepip.utils import is_url_accessible
 import unittest
 
 import asyncio
-import aiohttp
-
-
-async def is_url_accessible(url: str) -> bool:
-    """Check if a URL is accessible."""
-    try:
-        async with aiohttp.ClientSession() as session:
-            async with session.get(url) as response:
-                return response.status == 200
-    except Exception:
-        return False
 
 
 class TestGitHubSearch(unittest.IsolatedAsyncioTestCase):

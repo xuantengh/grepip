@@ -3,6 +3,20 @@ import abc
 
 class CodeSearcher(abc.ABC):
     @abc.abstractmethod
+    @classmethod
+    def is_acceptable(cls, codebase_url: str) -> bool:
+        """
+        Check if the codebase URL is acceptable for this searcher.
+
+        Args:
+            codebase_url (str): the URL of the codebase to check.
+
+        Returns:
+            bool: True if the codebase is acceptable, False otherwise.
+        """
+        raise NotImplementedError
+
+    @abc.abstractmethod
     async def search(
         self,
         codebase: str,
