@@ -3,16 +3,16 @@ import asyncio
 import aiohttp
 import aiofiles
 import dataclasses
-import pathlib
 import json
 import functools
+
+from grepip.utils import get_cache_dir
 
 __all__ = [
     "fetch_pypi_package_info",
     "PypiPackageInfo",
 ]
 
-_GREPIP_CACHE_DIR = pathlib.Path.home() / ".cache" / "grepip"
 
 # TODO: rwlock
 _pypi_cache_lock = asyncio.Lock()
@@ -22,7 +22,7 @@ def _pypi_cache(
     fn: Callable[..., "PypiPackageInfo"],
 ) -> Callable[..., "PypiPackageInfo"]:
     # TODO: use environment variable to disable cache behavior
-    cache_file = _GREPIP_CACHE_DIR / "pypi.json"
+    cache_file = get_cache_dir() / "pypi.json"
     if not cache_file.exists():
         cache_file.parent.mkdir(parents=True, exist_ok=True)
         with open(cache_file, "w") as f:
@@ -102,7 +102,7 @@ async def fetch_popular_pypi_packages(
     endpoint_url: str = _DEFAULT_ENDPOINT_URL,
 ) -> list[str]:
     data = None
-    popular_json = _GREPIP_CACHE_DIR / "top-pypi-packages.min.json"
+    popular_json = get_cache_dir() / "top-pypi-packages.min.json"
     # TODO: set cache TTL
     if popular_json.exists():
         async with aiofiles.open(popular_json, "r") as f:

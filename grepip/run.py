@@ -1,6 +1,7 @@
-import aiolimiter
 import grepip.search as gs
 import grepip.pypi as gp
+from tqdm.asyncio import tqdm
+from aiolimiter import AsyncLimiter
 
 
 async def main():
@@ -16,12 +17,6 @@ async def main():
     )
 
     parser.add_argument("--pattern", type=str, help="Search pattern")
-    parser.add_argument(
-        "--languages",
-        nargs="*",
-        default=None,
-        help="List of programming languages to filter results",
-    )
     args = parser.parse_args()
 
     targets: list[str] = []
@@ -33,9 +28,7 @@ async def main():
     else:
         raise ValueError("Either --top or --package must be specified")
 
-    searcher = gs.gh.GitHubSearch()
-
-    tasks = []
+    tasks: list[asyncio.Task] = []
     async with asyncio.TaskGroup() as tg:
         for pkg in targets:
             tasks.append(tg.create_task(gp.fetch_pypi_package_info(pkg)))
@@ -43,25 +36,27 @@ async def main():
     valid_pkgs: list[gp.PypiPackageInfo] = []
     for task in tasks:
         pkg_info: gp.PypiPackageInfo = task.result()
-        if searcher.is_acceptable(pkg_info.source_url):
+        if gs.gh.GitHubSearch.is_acceptable(pkg_info.source_url):
             valid_pkgs.append(pkg_info)
 
     tasks = []
-    limiter = aiolimiter.AsyncLimiter(5, 60)
-    async with asyncio.TaskGroup() as tg, limiter:
-        for pkg_info in valid_pkgs:
-            codebase = searcher.extract_codebase(pkg_info.source_url)
-            task = tg.create_task(
-                searcher.search(codebase, args.pattern, args.languages)
-            )
-            tasks.append(task)
+    with tqdm(total=len(valid_pkgs), desc="Downloading and searching") as pbar:
+        async with asyncio.TaskGroup() as tg, AsyncLimiter(30, 60):
+            for pkg_info in valid_pkgs:
+                searcher = gs.gh.GitHubSearch()
+                task = tg.create_task(
+                    searcher.download_and_zgrep(pkg_info.source_url, args.pattern)
+                )
+                task.add_done_callback(lambda t: pbar.update(1))
+                tasks.append(task)
 
-    for i, task in enumerate(tasks):
-        results: list[gs.CodeResult] = task.result()
-        for result in results:
-            print(
-                f"Project: {valid_pkgs[i].name}, File: {result.file}, Path: {result.path}, URL: {result.http_url}"
-            )
+    results = await asyncio.gather(*tasks)
+    for i, result in enumerate(results):
+        print(valid_pkgs[i].name)
+        if len(result) > 0:
+            for line in result:
+                print(f"\t{line}")
+        print("-" * 20)
 
 
 if __name__ == "__main__":

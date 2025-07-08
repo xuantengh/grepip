@@ -1,5 +1,6 @@
 import abc
 import dataclasses
+import pathlib
 
 
 @dataclasses.dataclass(frozen=True)
@@ -10,6 +11,8 @@ class CodeResult:
 
 
 class CodeSearcher(abc.ABC):
+    artifact_path: pathlib.Path = None
+
     @classmethod
     @abc.abstractmethod
     def is_acceptable(cls, codebase_url: str) -> bool:
@@ -25,20 +28,22 @@ class CodeSearcher(abc.ABC):
         raise NotImplementedError
 
     @abc.abstractmethod
-    async def search(
+    async def fetch_release(
         self,
         codebase: str,
-        pattern: str,
-        languages: list[str] | None = None,
-    ) -> list[CodeResult]:
+    ) -> pathlib.Path:
+        raise NotImplementedError
+
+    @abc.abstractmethod
+    async def zgrep(self, path: pathlib.Path, pattern: str) -> list[str]:
         """
-        Search for code snippets based on the provided pattern.
+        Search for a pattern in the codebase.
 
         Args:
-            codebase (str): the codebase to search within.
-            pattern (str): the search pattern.
+            path (pathlib.Path): the path to the codebase.
+            pattern (str): the pattern to search for.
 
         Returns:
-            list[dict]: a list of search results.
+            list[CodeResult]: a list of CodeResult objects containing the search results.
         """
         raise NotImplementedError

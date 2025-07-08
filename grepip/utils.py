@@ -1,5 +1,22 @@
 import logging
+import pathlib
 import aiohttp
+
+__all__ = [
+    "get_cache_dir",
+    "is_url_accessible",
+    "GREPIP_RETRY_TIMES",
+]
+
+GREPIP_RETRY_TIMES = 3
+_GREPIP_CACHE_DIR = pathlib.Path.home() / ".cache" / "grepip"
+
+
+def get_cache_dir() -> pathlib.Path:
+    global _GREPIP_CACHE_DIR
+    if not _GREPIP_CACHE_DIR.exists():
+        _GREPIP_CACHE_DIR.mkdir(parents=True, exist_ok=True)
+    return _GREPIP_CACHE_DIR
 
 
 async def is_url_accessible(url: str) -> bool:

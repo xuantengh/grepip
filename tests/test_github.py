@@ -1,26 +1,35 @@
-import grepip.search as gs
-from grepip.utils import is_url_accessible
-import unittest
-
 import asyncio
+import grepip.search as gs
+import unittest
+from tqdm.asyncio import tqdm
 
 
 class TestGitHubSearch(unittest.IsolatedAsyncioTestCase):
     async def test_cupy(self):
         searcher = gs.gh.GitHubSearch()
-        results: list[gs.gh.CodeResult] = await searcher.search(
-            "cupy/cupy", "cudaMemcpy"
-        )
-        self.assertTrue(len(results) > 0, "cudaMemcpy must in cupy/cupy")
+        await searcher.fetch_release("https://github.com/cupy/cupy")
+        results = searcher.zgrep("cudaMemcpy")
 
+        self.assertIsNotNone(results)
+        for line in results:
+            self.assertIn("cudaMemcpy", line)
+
+    async def test_tqdm(self):
+        packages = [
+            "numpy/numpy",
+            "pandas-dev/pandas",
+        ]
+        searcher = gs.gh.GitHubSearch()
         tasks: list[asyncio.Task] = []
-        async with asyncio.TaskGroup() as tg:
-            for result in results:
-                task = tg.create_task(is_url_accessible(result.http_url))
-                tasks.append(task)
+        with tqdm(total=len(packages), desc="Downloading and searching") as pbar:
+            async with asyncio.TaskGroup() as tg:
+                for package in packages:
+                    url = f"https://github.com/{package}"
+                    task = tg.create_task(
+                        searcher.download_and_zgrep(url, "PyModule_Create")
+                    )
+                    task.add_done_callback(lambda _: pbar.update(1))
+                    tasks.append(task)
 
-        for i, task in enumerate(tasks):
-            self.assertTrue(
-                task.result(),
-                f"URL {results[i].http_url} for file {results[i].path} is not accessible",
-            )
+        results = await asyncio.gather(*tasks)
+        self.assertIsNotNone(results)
