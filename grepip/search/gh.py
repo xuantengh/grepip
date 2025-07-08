@@ -5,6 +5,8 @@ import aiofiles
 import subprocess
 import os
 
+import aiohttp.client_exceptions
+
 from grepip.utils import get_cache_dir, GREPIP_RETRY_TIMES
 from .base import CodeSearcher
 
@@ -79,14 +81,23 @@ class GitHubSearch(CodeSearcher):
                     tarball_url = latest_artifact.get("tarball_url", None)
 
                     for _ in range(GREPIP_RETRY_TIMES):
-                        async with session.get(tarball_url) as response:
-                            if response.status == 200:
+                        try:
+                            async with session.get(tarball_url) as response:
+                                if response.status != 200:
+                                    continue
                                 async with aiofiles.open(save_path, "wb") as f:
                                     await f.write(await response.read())
-                                if save_path.stat().st_size > 0:
-                                    break
-                                else:
-                                    os.remove(save_path)
+
+                        except aiohttp.client_exceptions.ClientError:
+                            # TODO: log warning here
+                            if save_path.exists():
+                                os.remove(save_path)
+                            continue
+
+                        if save_path.exists() and save_path.stat().st_size > 0:
+                            break
+                        else:
+                            os.remove(save_path)
 
                     if save_path.exists() and save_path.stat().st_size > 0:
                         self.artifact_path = save_path
