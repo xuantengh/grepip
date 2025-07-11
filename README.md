@@ -1,9 +1,9 @@
 ## grepip
 
-`grepip` is a utility help to search the occurrances of regex strings in the source codes given a PyPI package.
-It is designed to serve for the purpose of find the impact scope the when deprecating and removing a public C API from CPython, initially.
+`grepip` is a utility help to search the occurrances of strings in the source codes given a PyPI package.
+Initially, it was designed to serve for the purpose of find the impact scope the when deprecating and removing a public C API from CPython.
 
-You need a GitHub personal access token (without any permissions) to search code online.
+You need a [GitHub personal access token](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens) (without any permissions) to fetch the artifact URLs for a repository.
 
 ## Run
 
@@ -23,6 +23,6 @@ export GITHUB_TOKEN="<your token>"
 python3 -m unittest
 ```
 
-## Acknowledgement
+## Acknowledgements
 
 - https://hugovk.github.io/top-pypi-packages/
